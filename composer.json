@@ -17,7 +17,8 @@
   "require": {
     "php": ">=5.4.0",
     "yiisoft/yii2": "*",
-    "yiisoft/yii2-redis":"~2.0"
+    "predis/predis": "~1.0",
+    "nesbot/carbon": "~1.22"
   },
   "autoload": {
     "psr-4": {
