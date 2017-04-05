@@ -5,7 +5,7 @@
  * @license http://www.tintsoft.com/license/
  */
 
-namespace xutl\ranks;
+namespace xutl\ranking;
 
 use yii\base\Component;
 use yii\base\InvalidConfigException;
