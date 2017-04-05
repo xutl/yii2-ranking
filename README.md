@@ -42,7 +42,12 @@ return [
         ],
     ]
 ];
+```
 
+使用
+----
+
+```php
 /** @var \xutl\ranking\Ranking $ranking */
 $ranking = Yii::$app->ranking;
 
