@@ -10,7 +10,7 @@ namespace xutl\ranks;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 use Carbon\Carbon;
-use Predis\Client;
+use Redis;
 
 /**
  * Class Ranks
@@ -29,7 +29,7 @@ class Ranks extends Component
     public $redis;
 
     /**
-     * @var Client
+     * @var Redis
      */
     private $client;
 
@@ -42,7 +42,7 @@ class Ranks extends Component
         if (empty ($this->redis)) {
             throw new InvalidConfigException ('The "redis" property must be set.');
         }
-        $this->client = new Client($this->redis);
+        $this->client = new Redis($this->redis);
     }
 
     /**
