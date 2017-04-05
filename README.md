@@ -10,13 +10,13 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```
-php composer.phar require --prefer-dist xutl/yii2-ranks
+php composer.phar require --prefer-dist xutl/yii2-ranking
 ```
 
 or add
 
 ```
-"xutl/yii2-ranks": "~1.0.0"
+"xutl/yii2-ranking": "~1.0.0"
 ```
 
 to the require section of your `composer.json` file.
