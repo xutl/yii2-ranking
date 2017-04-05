@@ -74,6 +74,17 @@ class Ranking extends Component
     }
 
     /**
+     * 获取本周Top 10
+     * @return mixed
+     */
+    public function getCurrentWeekTop10()
+    {
+        $dates = static::getCurrentWeekDates();
+        return $this->getMultiDaysRankings($dates, 'rank:current_week', 0, 9);
+    }
+
+
+    /**
      * 获得指定日期的排名
      * @param string $date 20170101
      * @param int $start 开始行
@@ -105,6 +116,22 @@ class Ranking extends Component
         return $this->redis->zrevrange($outKey, $start, $stop, ['withscores' => true]);
     }
 
+    /**
+     * 获取本周日期
+     * @return array
+     */
+    public static function getCurrentWeekDates()
+    {
+        $dt = Carbon::now();
+        $dt->startOfWeek();
+        $dates = [];
+        for ($day = 1; $day <= 7; $day++) {
+            $dates[] = $dt->format('Ymd');
+            $dt->addDay();
+        }
+        return $dates;
+    }
+    
     /**
      * 获取当前月份日期
      * @return array
