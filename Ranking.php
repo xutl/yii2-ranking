@@ -7,17 +7,16 @@
 
 namespace xutl\ranking;
 
-use Yii;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 use Carbon\Carbon;
 use Predis\Client;
 
 /**
- * Class Ranks
+ * Class Ranking
  * @package xutl\ranks
  */
-class Ranks extends Component
+class Ranking extends Component
 {
     /**
      * @var string 榜单名称
@@ -25,15 +24,10 @@ class Ranks extends Component
     public $prefix = 'rank:';
 
     /**
-     * @var array redis config
-     * @see https://github.com/nrk/predis
+     * @var \Predis\Client|array
+     * @see https://github.com/nrk/predis/wiki/Quick-tour
      */
     public $redis;
-
-    /**
-     * @var \Predis\Client
-     */
-    private $client;
 
     /**
      * @inheritdoc
@@ -44,7 +38,7 @@ class Ranks extends Component
         if (empty ($this->redis)) {
             throw new InvalidConfigException ('The "redis" property must be set.');
         }
-        $this->client = new Client($this->redis);
+        $this->redis = new Client($this->redis);
     }
 
     /**
@@ -56,7 +50,7 @@ class Ranks extends Component
     public function addScores($identity, $scores)
     {
         $key = $this->prefix . date('Ymd');
-        return $this->client->zincrby($key, $scores, $identity);
+        return $this->redis->zincrby($key, $scores, $identity);
     }
 
     /**
@@ -84,12 +78,12 @@ class Ranks extends Component
      * @param string $date 20170101
      * @param int $start 开始行
      * @param int $stop 结束行
-     * @return mixed
+     * @return array
      */
     protected function getOneDayRankings($date, $start, $stop)
     {
         $key = $this->prefix . $date;
-        return $this->client->zrevrange($key, $start, $stop, true);
+        return $this->redis->zrevrange($key, $start, $stop, ['withscores' => true]);
     }
 
     /**
@@ -107,8 +101,8 @@ class Ranks extends Component
         }, $dates);
 
         $weights = array_fill(0, count($keys), 1);
-        $this->client->zunionstore($outKey, $keys, $weights);
-        return $this->client->zrevrange($outKey, $start, $stop, true);
+        $this->redis->zunionstore($outKey, $keys, $weights);
+        return $this->redis->zrevrange($outKey, $start, $stop, ['withscores' => true]);
     }
 
     /**
