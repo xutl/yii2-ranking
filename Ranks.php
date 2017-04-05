@@ -26,6 +26,7 @@ class Ranks extends Component
 
     /**
      * @var array redis config
+     * @see https://github.com/nrk/predis
      */
     public $redis;
 
