@@ -7,10 +7,11 @@
 
 namespace xutl\ranking;
 
+use Yii;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 use Carbon\Carbon;
-use Redis;
+use Predis\Client;
 
 /**
  * Class Ranks
@@ -29,7 +30,7 @@ class Ranks extends Component
     public $redis;
 
     /**
-     * @var Redis
+     * @var \Predis\Client
      */
     private $client;
 
@@ -42,7 +43,7 @@ class Ranks extends Component
         if (empty ($this->redis)) {
             throw new InvalidConfigException ('The "redis" property must be set.');
         }
-        $this->client = new Redis($this->redis);
+        $this->client = new Client($this->redis);
     }
 
     /**
@@ -54,39 +55,7 @@ class Ranks extends Component
     public function addScores($identity, $scores)
     {
         $key = $this->prefix . date('Ymd');
-        return $this->client->zIncrBy($key, $scores, $identity);
-    }
-
-    /**
-     * 获得一天排名
-     * @param string $date
-     * @param int $start
-     * @param int $stop
-     * @return mixed
-     */
-    protected function getOneDayRankings($date, $start, $stop)
-    {
-        $key = $this->prefix . $date;
-        return $this->client->zRevRange($key, $start, $stop, true);
-    }
-
-    /**
-     * 获得多天排名
-     * @param array $dates
-     * @param string $outKey
-     * @param int $start
-     * @param int $stop
-     * @return mixed
-     */
-    protected function getMultiDaysRankings($dates, $outKey, $start, $stop)
-    {
-        $keys = array_map(function ($date) {
-            return $this->prefix . $date;
-        }, $dates);
-
-        $weights = array_fill(0, count($keys), 1);
-        $this->client->zUnion($outKey, $keys, $weights);
-        return $this->client->zRevRange($outKey, $start, $stop, true);
+        return $this->client->zincrby($key, $scores, $identity);
     }
 
     /**
@@ -97,6 +66,48 @@ class Ranks extends Component
     {
         $date = Carbon::now()->subDays(1)->format('Ymd');
         return $this->getOneDayRankings($date, 0, 9);
+    }
+
+    /**
+     * 获取当前月份Top 10
+     * @return mixed
+     */
+    public function getCurrentMonthTop10()
+    {
+        $dates = static::getCurrentMonthDates();
+        return $this->getMultiDaysRankings($dates, 'rank:current_month', 0, 9);
+    }
+
+    /**
+     * 获得指定日期的排名
+     * @param string $date 20170101
+     * @param int $start 开始行
+     * @param int $stop 结束行
+     * @return mixed
+     */
+    protected function getOneDayRankings($date, $start, $stop)
+    {
+        $key = $this->prefix . $date;
+        return $this->client->zrevrange($key, $start, $stop, true);
+    }
+
+    /**
+     * 获得多天排名
+     * @param array $dates ['20170101','20170102']
+     * @param string $outKey 输出Key
+     * @param int $start 开始行
+     * @param int $stop 结束行
+     * @return mixed
+     */
+    protected function getMultiDaysRankings($dates, $outKey, $start, $stop)
+    {
+        $keys = array_map(function ($date) {
+            return $this->prefix . $date;
+        }, $dates);
+
+        $weights = array_fill(0, count($keys), 1);
+        $this->client->zunionstore($outKey, $keys, $weights);
+        return $this->client->zrevrange($outKey, $start, $stop, true);
     }
 
     /**
@@ -114,15 +125,5 @@ class Ranks extends Component
             $dates[] = $dt->format('Ymd');
         }
         return $dates;
-    }
-
-    /**
-     * 获取当前月份Top 10
-     * @return mixed
-     */
-    public function getCurrentMonthTop10()
-    {
-        $dates = self::getCurrentMonthDates();
-        return $this->getMultiDaysRankings($dates, $this->prefix . 'current_month', 0, 9);
     }
 }
