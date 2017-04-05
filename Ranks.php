@@ -48,7 +48,7 @@ class Ranks extends Component
     /**
      * 添加分数
      * @param string|int $identity
-     * @param $scores
+     * @param int $scores
      * @return mixed
      */
     public function addScores($identity, $scores)
@@ -59,9 +59,9 @@ class Ranks extends Component
 
     /**
      * 获得一天排名
-     * @param $date
-     * @param $start
-     * @param $stop
+     * @param string $date
+     * @param int $start
+     * @param int $stop
      * @return mixed
      */
     protected function getOneDayRankings($date, $start, $stop)
@@ -72,16 +72,16 @@ class Ranks extends Component
 
     /**
      * 获得多天排名
-     * @param $dates
-     * @param $outKey
-     * @param $start
-     * @param $stop
+     * @param array $dates
+     * @param string $outKey
+     * @param int $start
+     * @param int $stop
      * @return mixed
      */
     protected function getMultiDaysRankings($dates, $outKey, $start, $stop)
     {
         $keys = array_map(function ($date) {
-            return $this->prefix. $date;
+            return $this->prefix . $date;
         }, $dates);
 
         $weights = array_fill(0, count($keys), 1);
@@ -108,7 +108,7 @@ class Ranks extends Component
         $dt = Carbon::now();
         $days = $dt->daysInMonth;
 
-        $dates = array();
+        $dates = [];
         for ($day = 1; $day <= $days; $day++) {
             $dt->day = $day;
             $dates[] = $dt->format('Ymd');
@@ -123,6 +123,6 @@ class Ranks extends Component
     public function getCurrentMonthTop10()
     {
         $dates = self::getCurrentMonthDates();
-        return $this->getMultiDaysRankings($dates, $this->prefix.'current_month', 0, 9);
+        return $this->getMultiDaysRankings($dates, $this->prefix . 'current_month', 0, 9);
     }
 }
