@@ -10,7 +10,7 @@ namespace xutl\ranking;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 use Carbon\Carbon;
-use Predis\Client;
+
 
 /**
  * Class Ranking
@@ -21,13 +21,7 @@ class Ranking extends Component
     /**
      * @var string 榜单名称
      */
-    public $prefix = 'rank:';
-
-    /**
-     * @var \Predis\Client|array
-     * @see https://github.com/nrk/predis/wiki/Quick-tour
-     */
-    public $redis;
+    public $prefix;
 
     /**
      * @inheritdoc
@@ -35,10 +29,10 @@ class Ranking extends Component
     public function init()
     {
         parent::init();
-        if (empty ($this->redis)) {
-            throw new InvalidConfigException ('The "redis" property must be set.');
+        if (empty ($this->prefix)) {
+            throw new InvalidConfigException ('The "prefix" property must be set.');
         }
-        $this->redis = new Client($this->redis);
+        $this->prefix = $this->prefix . ':';
     }
 
     /**
@@ -131,7 +125,7 @@ class Ranking extends Component
         }
         return $dates;
     }
-    
+
     /**
      * 获取当前月份日期
      * @return array

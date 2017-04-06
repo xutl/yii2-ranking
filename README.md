@@ -31,7 +31,7 @@ return [
     //....
     'components' => [
         'ranking' => [
-           'class' => 'xutl\ranking\Ranking',
+           'class' => 'xutl\ranking\Client',
            'redis' => [
                 'scheme' => 'tcp',
                 'host' => '127.0.0.1',
@@ -49,7 +49,7 @@ return [
 
 ```php
 /** @var \xutl\ranking\Ranking $ranking */
-$ranking = Yii::$app->ranking;
+$ranking = Yii::$app->ranking->getRankingRef('download');
 
 $ranking->addScores(1, 2);
 $ranking->addScores(2, 2);
